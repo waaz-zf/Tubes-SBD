@@ -1,0 +1,45 @@
+##################################
+# GLOBAL
+##################################
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+##################################
+# LARAVEL (BACKEND)
+##################################
+/perpustakaan-backend/vendor/
+/perpustakaan-backend/node_modules/
+/perpustakaan-backend/.env
+/perpustakaan-backend/.env.*
+/perpustakaan-backend/storage/*.key
+/perpustakaan-backend/storage/logs/*
+/perpustakaan-backend/storage/framework/cache/*
+/perpustakaan-backend/storage/framework/sessions/*
+/perpustakaan-backend/storage/framework/views/*
+/perpustakaan-backend/bootstrap/cache/*
+
+##################################
+# REACT (FRONTEND)
+##################################
+/perpustakaan-frontend/node_modules/
+/perpustakaan-frontend/build/
+/perpustakaan-frontend/dist/
+/perpustakaan-frontend/.env
+/perpustakaan-frontend/.env.*
+
+##################################
+# NPM / YARN / VITE
+##################################
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vite/
+
+##################################
+# CACHE & TEMP
+##################################
+*.log
+*.tmp
