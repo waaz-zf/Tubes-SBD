@@ -59,7 +59,7 @@ class AnggotaController extends Controller
                 'nama',
                 'email',
                 'alamat',
-                'tanggal_'
+                'tanggal_daftar'
             )->get()
         );
     }
