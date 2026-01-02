@@ -1,10 +1,10 @@
 /* eslint-disable */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "./Api_tmp";
 import Forbidden from "./Forbidden";
 
 function Dashboard({ user }) {
-  const [data, setData] = useState([]);
+  const [rawData, setRawData] = useState([]);
   const [mode, setMode] = useState("pagination");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -14,7 +14,7 @@ function Dashboard({ user }) {
   const [orderBy, setOrderBy] = useState("id_anggota");
   const [direction, setDirection] = useState("asc");
 
-  // 🔴 STATE KHUSUS UNTUK SIMULASI 403
+  // SIMULASI 403
   const [forceForbidden, setForceForbidden] = useState(false);
 
   useEffect(() => {
@@ -38,17 +38,45 @@ function Dashboard({ user }) {
             direction,
           },
         });
-        setData(response.data.data);
+        setRawData(response.data.data);
       } else {
         response = await api.get("/anggota-all");
-        setData(response.data);
+        setRawData(response.data);
       }
     } catch (err) {
-      setError("Gagal memuat data (Network Error / Timeout)");
+      console.error(err);
+      setError("Gagal memuat data");
     } finally {
       setLoading(false);
     }
   };
+
+  /* =====================================
+   * CLIENT-SIDE SEARCH & SORT
+   * (UNTUK TANPA PAGINATION)
+   * ===================================== */
+  const processedData = useMemo(() => {
+    let data = [...rawData];
+
+    // SEARCH
+    if (search) {
+      data = data.filter((item) =>
+        item.nama.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // SORT
+    data.sort((a, b) => {
+      let valA = a[orderBy];
+      let valB = b[orderBy];
+
+      if (valA < valB) return direction === "asc" ? -1 : 1;
+      if (valA > valB) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return data;
+  }, [rawData, search, orderBy, direction]);
 
   const toggleSort = (field) => {
     if (orderBy === field) {
@@ -59,9 +87,9 @@ function Dashboard({ user }) {
     }
   };
 
-  // 🔴 JIKA DISIMULASIKAN → TAMPILKAN 403
+  // 403 PAGE
   if (forceForbidden) {
-    return <Forbidden />;
+    return <Forbidden onBack={() => setForceForbidden(false)} />;
   }
 
   return (
@@ -78,7 +106,6 @@ function Dashboard({ user }) {
           </button>
         )}
 
-        {/* 🔴 TOMBOL SIMULASI 403 (HANYA UNTUK DEMO / SCREENSHOT) */}
         <button
           onClick={() => setForceForbidden(true)}
           style={{
@@ -119,7 +146,7 @@ function Dashboard({ user }) {
           </thead>
 
           <tbody>
-            {data.map((a) => (
+            {processedData.map((a) => (
               <tr key={a.id_anggota}>
                 <td>{a.id_anggota}</td>
                 <td>{a.nama}</td>
@@ -132,7 +159,7 @@ function Dashboard({ user }) {
                     <button
                       onClick={() =>
                         alert(
-                          `Simulasi Edit\nID: ${a.id_anggota}\nNama: ${a.nama}`,
+                          `Simulasi Edit\nID: ${a.id_anggota}\nNama: ${a.nama}`
                         )
                       }
                     >
@@ -145,7 +172,7 @@ function Dashboard({ user }) {
                       style={{ marginLeft: "5px" }}
                       onClick={() =>
                         alert(
-                          `Simulasi Hapus\nID: ${a.id_anggota}\nNama: ${a.nama}`,
+                          `Simulasi Hapus\nID: ${a.id_anggota}\nNama: ${a.nama}`
                         )
                       }
                     >
