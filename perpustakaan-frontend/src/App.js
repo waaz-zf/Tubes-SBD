@@ -14,7 +14,7 @@ function App() {
   }
 
   // =========================
-  // VALIDASI ROLE (AMAN)
+  // VALIDASI ROLE
   // =========================
   const roles = user.roles || [];
 
@@ -27,13 +27,18 @@ function App() {
   // ROLE TIDAK VALID → 403
   // =========================
   if (!isValidRole) {
-    return <Forbidden />;
+    return <Forbidden onLogout={() => setUser(null)} />;
   }
 
   // =========================
   // DASHBOARD
   // =========================
-  return <Dashboard user={user} />;
+  return (
+    <Dashboard
+      user={user}
+      onLogout={() => setUser(null)}
+    />
+  );
 }
 
 export default App;

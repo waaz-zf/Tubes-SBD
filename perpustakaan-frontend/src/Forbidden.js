@@ -1,17 +1,32 @@
-function Forbidden({ onBack }) {
-  return (
-    <div style={{ padding: "40px", textAlign: "center" }}>
-      <h1>403 Forbidden</h1>
-      <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+import "./styles/forbidden.css";
 
-      {onBack && (
-        <button
-          onClick={onBack}
-          style={{ marginTop: "20px", padding: "8px 16px" }}
-        >
-          Kembali
-        </button>
-      )}
+function Forbidden({ onBack, onLogout }) {
+  return (
+    <div className="forbidden-wrapper">
+      <div className="forbidden-card">
+        <div className="forbidden-icon">⛔</div>
+
+        <h1>403 Forbidden</h1>
+        <p>
+          Anda tidak memiliki izin untuk mengakses halaman ini.
+          <br />
+          Silakan kembali atau logout untuk masuk dengan akun lain.
+        </p>
+
+        <div className="forbidden-actions">
+          {onBack && (
+            <button className="btn-secondary" onClick={onBack}>
+              ⬅ Kembali
+            </button>
+          )}
+
+          {onLogout && (
+            <button className="btn-danger" onClick={onLogout}>
+              🚪 Logout
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
