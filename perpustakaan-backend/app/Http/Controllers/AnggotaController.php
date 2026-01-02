@@ -34,7 +34,7 @@ class AnggotaController extends Controller
             $query->where('nama', 'like', '%' . $search . '%');
         }
 
-        // SORT (AMAN)
+        // SORT (WHITELIST)
         $allowedSort = ['id_anggota', 'nama', 'tanggal_daftar'];
         if (in_array($orderBy, $allowedSort)) {
             $query->orderBy($orderBy, $direction);
@@ -48,19 +48,27 @@ class AnggotaController extends Controller
     /**
      * =====================================================
      * SCENARIO 2: TANPA PAGINATION (STRESS TEST)
-     * - Digunakan untuk simulasi beban tinggi
-     * =====================================================
+     * - Endpoint BERAT
+     * - Akses dikontrol di FRONTEND (RBAC UI)
+     =====================================================
      */
     public function all()
     {
-        return response()->json(
-            DB::table('anggota')->select(
+        /**
+         * ⚠️ TANPA PAGINATION
+         * Dibatasi untuk mencegah crash browser
+         */
+        $anggota = DB::table('anggota')
+            ->select(
                 'id_anggota',
                 'nama',
                 'email',
                 'alamat',
                 'tanggal_daftar'
-            )->get()
-        );
+            )
+            ->limit(5000) // AMAN
+            ->get();
+
+        return response()->json($anggota);
     }
 }
