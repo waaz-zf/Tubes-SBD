@@ -14,9 +14,16 @@ function Login({ setUser }) {
   return (
     <form onSubmit={submit}>
       <h2>Login</h2>
-      <input placeholder="Username" onChange={e=>setUsername(e.target.value)} />
+      <input
+        placeholder="Username"
+        onChange={(e) => setUsername(e.target.value)}
+      />
       <br />
-      <input type="password" placeholder="Password" onChange={e=>setPassword(e.target.value)} />
+      <input
+        type="password"
+        placeholder="Password"
+        onChange={(e) => setPassword(e.target.value)}
+      />
       <br />
       <button>Login</button>
     </form>

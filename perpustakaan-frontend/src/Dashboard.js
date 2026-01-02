@@ -70,15 +70,10 @@ function Dashboard({ user }) {
 
       {/* MODE BUTTON */}
       <div style={{ marginBottom: "10px" }}>
-        <button onClick={() => setMode("pagination")}>
-          Pagination
-        </button>
+        <button onClick={() => setMode("pagination")}>Pagination</button>
 
         {user.roles.includes("Admin") && (
-          <button
-            onClick={() => setMode("all")}
-            style={{ marginLeft: "5px" }}
-          >
+          <button onClick={() => setMode("all")} style={{ marginLeft: "5px" }}>
             Tanpa Pagination
           </button>
         )}
@@ -86,7 +81,11 @@ function Dashboard({ user }) {
         {/* 🔴 TOMBOL SIMULASI 403 (HANYA UNTUK DEMO / SCREENSHOT) */}
         <button
           onClick={() => setForceForbidden(true)}
-          style={{ marginLeft: "10px", backgroundColor: "#f44336", color: "white" }}
+          style={{
+            marginLeft: "10px",
+            backgroundColor: "#f44336",
+            color: "white",
+          }}
         >
           Simulasi 403
         </button>
@@ -130,11 +129,26 @@ function Dashboard({ user }) {
                 <td>
                   {(user.roles.includes("Admin") ||
                     user.roles.includes("Editor")) && (
-                    <button>Edit</button>
+                    <button
+                      onClick={() =>
+                        alert(
+                          `Simulasi Edit\nID: ${a.id_anggota}\nNama: ${a.nama}`,
+                        )
+                      }
+                    >
+                      Edit
+                    </button>
                   )}
 
                   {user.roles.includes("Admin") && (
-                    <button style={{ marginLeft: "5px" }}>
+                    <button
+                      style={{ marginLeft: "5px" }}
+                      onClick={() =>
+                        alert(
+                          `Simulasi Hapus\nID: ${a.id_anggota}\nNama: ${a.nama}`,
+                        )
+                      }
+                    >
                       Hapus
                     </button>
                   )}
