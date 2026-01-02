@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { useEffect, useState } from "react";
 import api from "./Api_tmp";
+import Forbidden from "./Forbidden";
 
 function Dashboard({ user }) {
   const [data, setData] = useState([]);
@@ -8,10 +9,13 @@ function Dashboard({ user }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // SEARCH & SORT STATE
+  // SEARCH & SORT
   const [search, setSearch] = useState("");
   const [orderBy, setOrderBy] = useState("id_anggota");
   const [direction, setDirection] = useState("asc");
+
+  // 🔴 STATE KHUSUS UNTUK SIMULASI 403
+  const [forceForbidden, setForceForbidden] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -40,7 +44,6 @@ function Dashboard({ user }) {
         setData(response.data);
       }
     } catch (err) {
-      console.error(err);
       setError("Gagal memuat data (Network Error / Timeout)");
     } finally {
       setLoading(false);
@@ -56,18 +59,21 @@ function Dashboard({ user }) {
     }
   };
 
+  // 🔴 JIKA DISIMULASIKAN → TAMPILKAN 403
+  if (forceForbidden) {
+    return <Forbidden />;
+  }
+
   return (
     <div>
       <h2>Dashboard ({user.roles.join(", ")})</h2>
 
       {/* MODE BUTTON */}
       <div style={{ marginBottom: "10px" }}>
-        {/* SEMUA ROLE */}
         <button onClick={() => setMode("pagination")}>
           Pagination
         </button>
 
-        {/* HANYA ADMIN */}
         {user.roles.includes("Admin") && (
           <button
             onClick={() => setMode("all")}
@@ -76,6 +82,14 @@ function Dashboard({ user }) {
             Tanpa Pagination
           </button>
         )}
+
+        {/* 🔴 TOMBOL SIMULASI 403 (HANYA UNTUK DEMO / SCREENSHOT) */}
+        <button
+          onClick={() => setForceForbidden(true)}
+          style={{ marginLeft: "10px", backgroundColor: "#f44336", color: "white" }}
+        >
+          Simulasi 403
+        </button>
       </div>
 
       {/* SEARCH */}
@@ -87,13 +101,11 @@ function Dashboard({ user }) {
         style={{ marginBottom: "10px", width: "200px" }}
       />
 
-      {/* STATUS */}
-      {loading && <p>Loading data...</p>}
+      {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {/* TABLE */}
       {!loading && !error && (
-        <table border="1" cellPadding="5" cellSpacing="0">
+        <table border="1" cellPadding="5">
           <thead>
             <tr>
               <th onClick={() => toggleSort("id_anggota")}>ID</th>
@@ -115,31 +127,14 @@ function Dashboard({ user }) {
                 <td>{a.email}</td>
                 <td>{a.alamat}</td>
                 <td>{a.tanggal_daftar}</td>
-
-                {/* RBAC COMPONENT-LEVEL */}
                 <td>
                   {(user.roles.includes("Admin") ||
                     user.roles.includes("Editor")) && (
-                    <button
-                      onClick={() =>
-                        alert(
-                          `Simulasi Edit\nID: ${a.id_anggota}\nNama: ${a.nama}`
-                        )
-                      }
-                    >
-                      Edit
-                    </button>
+                    <button>Edit</button>
                   )}
 
                   {user.roles.includes("Admin") && (
-                    <button
-                      style={{ marginLeft: "5px" }}
-                      onClick={() =>
-                        alert(
-                          `Simulasi Hapus\nID: ${a.id_anggota}\nNama: ${a.nama}`
-                        )
-                      }
-                    >
+                    <button style={{ marginLeft: "5px" }}>
                       Hapus
                     </button>
                   )}

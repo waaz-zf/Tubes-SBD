@@ -1,15 +1,22 @@
 import { useState } from "react";
-import Login from "./Login_tmp"; // pakai yang stabil
+import Login from "./Login_tmp";
 import Dashboard from "./Dashboard";
+import Forbidden from "./Forbidden";
 
 function App() {
   const [user, setUser] = useState(null);
 
-  if (!user) return <Login setUser={setUser} />;
+  if (!user) {
+    return <Login setUser={setUser} />;
+  }
 
-  // Hanya Admin & Editor boleh ke dashboard
-  if (!user.roles.includes("Admin") && !user.roles.includes("Editor") && !user.roles.includes("Viewer")) {
-    return <h2>403 Forbidden</h2>;
+  // ROLE TIDAK VALID → 403
+  if (
+    !user.roles.includes("Admin") &&
+    !user.roles.includes("Editor") &&
+    !user.roles.includes("Viewer")
+  ) {
+    return <Forbidden />;
   }
 
   return <Dashboard user={user} />;
