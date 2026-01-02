@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "./Api_tmp";
 import Forbidden from "./Forbidden";
+import "./styles/dashboard.css";
 
 function Dashboard({ user }) {
   const [rawData, setRawData] = useState([]);
@@ -9,17 +10,21 @@ function Dashboard({ user }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // SEARCH & SORT
   const [search, setSearch] = useState("");
   const [orderBy, setOrderBy] = useState("id_anggota");
   const [direction, setDirection] = useState("asc");
 
-  // SIMULASI 403
   const [forceForbidden, setForceForbidden] = useState(false);
+
+  // Modal state
+  const [modal, setModal] = useState({
+    open: false,
+    type: "",
+    data: null,
+  });
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line
   }, [mode, search, orderBy, direction]);
 
   const fetchData = async () => {
@@ -27,51 +32,35 @@ function Dashboard({ user }) {
     setError("");
 
     try {
-      let response;
-
+      let res;
       if (mode === "pagination") {
-        response = await api.get("/anggota", {
-          params: {
-            per_page: 10,
-            search,
-            orderBy,
-            direction,
-          },
+        res = await api.get("/anggota", {
+          params: { per_page: 10, search, orderBy, direction },
         });
-        setRawData(response.data.data);
+        setRawData(res.data.data);
       } else {
-        response = await api.get("/anggota-all");
-        setRawData(response.data);
+        res = await api.get("/anggota-all");
+        setRawData(res.data);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Gagal memuat data");
     } finally {
       setLoading(false);
     }
   };
 
-  /* =====================================
-   * CLIENT-SIDE SEARCH & SORT
-   * (UNTUK TANPA PAGINATION)
-   * ===================================== */
   const processedData = useMemo(() => {
     let data = [...rawData];
 
-    // SEARCH
     if (search) {
-      data = data.filter((item) =>
-        item.nama.toLowerCase().includes(search.toLowerCase())
+      data = data.filter((i) =>
+        i.nama.toLowerCase().includes(search.toLowerCase())
       );
     }
 
-    // SORT
     data.sort((a, b) => {
-      let valA = a[orderBy];
-      let valB = b[orderBy];
-
-      if (valA < valB) return direction === "asc" ? -1 : 1;
-      if (valA > valB) return direction === "asc" ? 1 : -1;
+      if (a[orderBy] < b[orderBy]) return direction === "asc" ? -1 : 1;
+      if (a[orderBy] > b[orderBy]) return direction === "asc" ? 1 : -1;
       return 0;
     });
 
@@ -87,51 +76,42 @@ function Dashboard({ user }) {
     }
   };
 
-  // 403 PAGE
   if (forceForbidden) {
     return <Forbidden onBack={() => setForceForbidden(false)} />;
   }
 
   return (
-    <div>
-      <h2>Dashboard ({user.roles.join(", ")})</h2>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h2>Dashboard</h2>
+        <span className="role-badge">{user.roles.join(", ")}</span>
+      </div>
 
-      {/* MODE BUTTON */}
-      <div style={{ marginBottom: "10px" }}>
+      {/* Toolbar */}
+      <div className="toolbar">
         <button onClick={() => setMode("pagination")}>Pagination</button>
 
         {user.roles.includes("Admin") && (
-          <button onClick={() => setMode("all")} style={{ marginLeft: "5px" }}>
-            Tanpa Pagination
-          </button>
+          <button onClick={() => setMode("all")}>Tanpa Pagination</button>
         )}
 
-        <button
-          onClick={() => setForceForbidden(true)}
-          style={{
-            marginLeft: "10px",
-            backgroundColor: "#f44336",
-            color: "white",
-          }}
-        >
+        <button className="danger" onClick={() => setForceForbidden(true)}>
           Simulasi 403
         </button>
       </div>
 
-      {/* SEARCH */}
       <input
-        type="text"
+        className="search-input"
         placeholder="Cari nama anggota..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ marginBottom: "10px", width: "200px" }}
       />
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <p className="info">Loading...</p>}
+      {error && <p className="error">{error}</p>}
 
       {!loading && !error && (
-        <table border="1" cellPadding="5">
+        <table className="data-table">
           <thead>
             <tr>
               <th onClick={() => toggleSort("id_anggota")}>ID</th>
@@ -157,10 +137,9 @@ function Dashboard({ user }) {
                   {(user.roles.includes("Admin") ||
                     user.roles.includes("Editor")) && (
                     <button
+                      className="btn-edit"
                       onClick={() =>
-                        alert(
-                          `Simulasi Edit\nID: ${a.id_anggota}\nNama: ${a.nama}`
-                        )
+                        setModal({ open: true, type: "edit", data: a })
                       }
                     >
                       Edit
@@ -169,23 +148,49 @@ function Dashboard({ user }) {
 
                   {user.roles.includes("Admin") && (
                     <button
-                      style={{ marginLeft: "5px" }}
+                      className="btn-delete"
                       onClick={() =>
-                        alert(
-                          `Simulasi Hapus\nID: ${a.id_anggota}\nNama: ${a.nama}`
-                        )
+                        setModal({ open: true, type: "delete", data: a })
                       }
                     >
                       Hapus
                     </button>
                   )}
 
-                  {user.roles.includes("Viewer") && <span>-</span>}
+                  {user.roles.includes("Viewer") && "-"}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* MODAL */}
+      {modal.open && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>
+              {modal.type === "edit" ? "Edit Data" : "Hapus Data"}
+            </h3>
+            <p>
+              ID: <b>{modal.data.id_anggota}</b>
+              <br />
+              Nama: <b>{modal.data.nama}</b>
+            </p>
+
+            <div className="modal-actions">
+              <button onClick={() => setModal({ open: false })}>
+                Batal
+              </button>
+              <button
+                className={modal.type === "edit" ? "btn-edit" : "btn-delete"}
+                onClick={() => setModal({ open: false })}
+              >
+                {modal.type === "edit" ? "Simpan" : "Hapus"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

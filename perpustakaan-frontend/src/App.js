@@ -6,19 +6,33 @@ import Forbidden from "./Forbidden";
 function App() {
   const [user, setUser] = useState(null);
 
+  // =========================
+  // BELUM LOGIN
+  // =========================
   if (!user) {
     return <Login setUser={setUser} />;
   }
 
+  // =========================
+  // VALIDASI ROLE (AMAN)
+  // =========================
+  const roles = user.roles || [];
+
+  const isValidRole =
+    roles.includes("Admin") ||
+    roles.includes("Editor") ||
+    roles.includes("Viewer");
+
+  // =========================
   // ROLE TIDAK VALID → 403
-  if (
-    !user.roles.includes("Admin") &&
-    !user.roles.includes("Editor") &&
-    !user.roles.includes("Viewer")
-  ) {
+  // =========================
+  if (!isValidRole) {
     return <Forbidden />;
   }
 
+  // =========================
+  // DASHBOARD
+  // =========================
   return <Dashboard user={user} />;
 }
 
