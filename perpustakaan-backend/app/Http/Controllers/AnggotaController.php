@@ -66,7 +66,7 @@ class AnggotaController extends Controller
                 'alamat',
                 'tanggal_daftar'
             )
-            ->limit(2000) // AMAN
+            ->limit(10000) // AMAN
             ->get();
 
         return response()->json($anggota);
